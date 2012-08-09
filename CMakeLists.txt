@@ -23,6 +23,9 @@ if(NOT Slicer_SOURCE_DIR)
   include(${Slicer_USE_FILE})
 endif()
 
+# Find OpenCV by Atsushi 08092012
+find_package(OpenCV REQUIRED)
+
 #-----------------------------------------------------------------------------
 add_subdirectory(Logic)
 add_subdirectory(Widgets)
@@ -36,6 +39,7 @@ set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_BINARY_DIR}/Logic
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
+  ${OpenCV_INCLUDE_DIR}	# by Atsushi 08092012
   )
 
 set(MODULE_SRCS
@@ -57,6 +61,7 @@ set(MODULE_UI_SRCS
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
+  ${OpenCV_LIBS} # by Atsushi 08092012
   )
 
 set(MODULE_RESOURCES
