@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.7)
 if(NOT Slicer_SOURCE_DIR)
   set(EXTENSION_NAME NeedleTracker)
   set(EXTENSION_HOMEPAGE "http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Extensions/NeedleTracker")
-  set(EXTENSION_CATEGORY "Examples")
+  set(EXTENSION_CATEGORY "IGT")
   set(EXTENSION_CONTRIBUTORS "Jean-Christophe Fillion-Robin (Kitware)")
   set(EXTENSION_DESCRIPTION "This is an example of extension bundling a loadable module")
   set(EXTENSION_ICONURL "http://viewvc.slicer.org/viewvc.cgi/Slicer4/trunk/Extensions/Testing/NeedleTracker/Resources/Icons/NeedleTracker.png?revision=19437&view=co")
@@ -23,8 +23,15 @@ if(NOT Slicer_SOURCE_DIR)
   include(${Slicer_USE_FILE})
 endif()
 
-# Find OpenCV by Atsushi 08092012
+#include(ExternalProject)#include(SlicerMacroCheckExternalProjectDependency)
+
+# Find and install OpenCV by ayamada 08092012
 find_package(OpenCV REQUIRED)
+if(NOT OpenCV_DIR)
+#if(NOT Slicer_SOURCE_DIR)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/OpenCV.cmake")
+  return()
+endif()
 
 #-----------------------------------------------------------------------------
 add_subdirectory(Logic)
@@ -39,7 +46,7 @@ set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_BINARY_DIR}/Logic
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
-  ${OpenCV_INCLUDE_DIR}	# by Atsushi 08092012
+  ${OpenCV_INCLUDE_DIR}	# by ayamada 08092012
   )
 
 set(MODULE_SRCS
@@ -61,7 +68,7 @@ set(MODULE_UI_SRCS
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
-  ${OpenCV_LIBS} # by Atsushi 08092012
+  ${OpenCV_LIBS} # by ayamada 08092012
   )
 
 set(MODULE_RESOURCES
