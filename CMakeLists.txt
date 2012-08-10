@@ -23,7 +23,7 @@ if(NOT Slicer_SOURCE_DIR)
   include(${Slicer_USE_FILE})
 endif()
 
-# Find and install OpenCV by ayamada 08092012
+# Find and install OpenCV by ayamada based on Laurent's contribution 08092012
 find_package(OpenCV REQUIRED)
 if(NOT OpenCV_DIR)
 #if(NOT Slicer_SOURCE_DIR)
@@ -43,7 +43,7 @@ set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_BINARY_DIR}/Logic
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
-  ${OpenCV_INCLUDE_DIR}	# by ayamada 08092012
+  ${OpenCV_INCLUDE_DIR}	# by ayamada based on Laurent's contribution 08092012
   )
 
 set(MODULE_SRCS
@@ -65,7 +65,7 @@ set(MODULE_UI_SRCS
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
-  ${OpenCV_LIBS} # by ayamada 08092012
+  ${OpenCV_LIBS} # by ayamada based on Laurent's contribution 08092012
   )
 
 set(MODULE_RESOURCES
