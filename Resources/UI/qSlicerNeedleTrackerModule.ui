@@ -26,12 +26,9 @@
       <item>
        <widget class="QPushButton" name="OpenCVswitch">
         <property name="text">
-         <string>ON/OFF</string>
+         <string>OpenCV ON</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <widget class="qSlicerFooBarWidget" name="FooBar" native="true"/>
       </item>
      </layout>
     </widget>
@@ -62,12 +59,6 @@
    <class>ctkCollapsibleButton</class>
    <extends>QWidget</extends>
    <header>ctkCollapsibleButton.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>qSlicerFooBarWidget</class>
-   <extends>QWidget</extends>
-   <header>qSlicerFooBarWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -24,13 +24,46 @@
 #include "qSlicerNeedleTrackerModuleExport.h"
 
 // 8/21/2012 ayamada
-#include "OpenCVThread.h"
+#include <QThread.h>
+#include <QMutex.h>
+#include <QReadWriteLock.h>
+#include <QSemaphore.h>
+#include <QWaitCondition.h>
+
+
+#include <stdio.h>
+#include <cv.h>
+#include <cxcore.h>
+#include <highgui.h>
 
 class qSlicerNeedleTrackerModuleWidgetPrivate;
 class vtkMRMLNode;
 
 // 8/21/2012 ayamada
-class OpenCVThread;
+// QThread class to use OpenCV with thread
+class OpenCVThread : public QThread
+{
+  Q_OBJECT
+  
+public:
+  OpenCVThread();
+  
+  void setMessage(const QString &message);
+  void stop();
+  
+  CvCapture* src;
+  IplImage* frame;
+
+  
+protected:
+  void run();
+  
+private:
+  QString messageStr;
+  volatile bool stopped;
+  
+};
+
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class Q_SLICER_QTMODULES_NEEDLETRACKER_EXPORT qSlicerNeedleTrackerModuleWidget :
@@ -45,13 +78,13 @@ public:
   virtual ~qSlicerNeedleTrackerModuleWidget();
 
   // 8/20/2012 ayamada
-  int OpenCVswitch;
-  OpenCVThread OpenCvthread;
-  
+  // use of OpenCVThread class
+  OpenCVThread OpenCVthread;
+
 public slots:
 
   // 8/20/2012 ayamada
-  void onOpenCVstatusChanged();
+  void startOrStopOpenCVThread();
   
 protected:
   QScopedPointer<qSlicerNeedleTrackerModuleWidgetPrivate> d_ptr;
@@ -62,5 +95,6 @@ private:
   Q_DECLARE_PRIVATE(qSlicerNeedleTrackerModuleWidget);
   Q_DISABLE_COPY(qSlicerNeedleTrackerModuleWidget);
 };
+
 
 #endif

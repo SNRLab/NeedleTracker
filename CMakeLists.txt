@@ -54,8 +54,8 @@ set(MODULE_SRCS
   qSlicer${MODULE_NAME}ModuleWidget.h
   
   # 8/21/2012 ayamada
-  OpenCVThread.cxx
-  OpenCVThread.h
+  #OpenCVThread.cxx
+  #OpenCVThread.h
   )
 
 set(MODULE_MOC_SRCS
@@ -63,7 +63,7 @@ set(MODULE_MOC_SRCS
   qSlicer${MODULE_NAME}ModuleWidget.h
   
   # 8/21/2012 ayamada
-  OpenCVThread.h
+  #OpenCVThread.h
   )
 
 set(MODULE_UI_SRCS

@@ -22,15 +22,6 @@
 #include "qSlicerNeedleTrackerModuleWidget.h"
 #include "ui_qSlicerNeedleTrackerModule.h"
 
-// 8/20/2012 ayamada
-#include <stdio.h>
-#include <cv.h>
-#include <cxcore.h>
-#include <highgui.h>
-
-//#include "OpenCVThread.h"
-
-
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class qSlicerNeedleTrackerModuleWidgetPrivate: public Ui_qSlicerNeedleTrackerModule
@@ -70,59 +61,66 @@ void qSlicerNeedleTrackerModuleWidget::setup()
   this->Superclass::setup();
   
   // 8/20/2012 ayamada
-  this->OpenCVswitch = 0;
   connect(d->OpenCVswitch, SIGNAL(clicked()),
-          this, SLOT(onOpenCVstatusChanged()));
+          this, SLOT(startOrStopOpenCVThread()));
   
 }
 
 // 8/20/2012 ayamada
-void qSlicerNeedleTrackerModuleWidget::onOpenCVstatusChanged()
+// SLOT function
+void qSlicerNeedleTrackerModuleWidget::startOrStopOpenCVThread()
 {
+  Q_D(qSlicerNeedleTrackerModuleWidget);
 
-  
-  if(this->OpenCVswitch == 0)
+  if(OpenCVthread.isRunning())
   {
-    /*
-    // 8/20/2012 ayamada
-    // Capture test
-    CvCapture* src = NULL;
-    IplImage *frame;
-    cvNamedWindow("TestCV");
-    
-    //src = cvCaptureFromCAM(0);
-    if((src = cvCreateCameraCapture(0)) == NULL)
-    {
-      cvWaitKey(10);
-    };
-    
-    cvNamedWindow("TestCV", CV_WINDOW_AUTOSIZE);
-    frame = cvQueryFrame(src);
-    cvShowImage("TestCV", frame);
-    
-    
-    while(1)
-    {
-      frame = cvQueryFrame(src);
-      cvShowImage("TestCV", frame);
-    }
-    */
-    
-    this->OpenCVswitch = 1;
-    std::cout << "this->OpenCVswitch =" << this->OpenCVswitch << endl;
+    OpenCVthread.stop();
+    OpenCVthread.wait();
+    d->OpenCVswitch->setText(tr("OpenCV ON"));
+    std::cout << "OpenCV thread was stopped." << endl;
   }else{
-
-    /*
-    // quit
-    cvReleaseCapture(&src);
-    cvReleaseImage(frame);
-    cvDestroyWindow("TestCV");
-    */
-    
-    this->OpenCVswitch = 0;
-    std::cout << "this->OpenCVswitch =" << this->OpenCVswitch << endl;
+    OpenCVthread.start();
+    d->OpenCVswitch->setText(tr("OpenCV OFF"));
+    std::cout << "OpenCV thread was started." << endl;
   }
   
+}
+
+OpenCVThread::OpenCVThread()
+{
+  this->stopped = false;
+
+  // initialization of cvCapture
+  this->src = NULL;
+  
+}
+
+// 8/21/2012 ayamada: thread for capturing
+void OpenCVThread::run()
+{
+  
+  // Capture test loop 
+  if((this->src = cvCreateCameraCapture(0)) != NULL)
+  { 
+    this->frame = cvQueryFrame(this->src);
+    
+    while (!this->stopped)
+    {
+      this->frame = cvQueryFrame(this->src);
+      //cerr << qPrintable(messageStr);    
+    }
+  }
+  
+  this->stopped = false;
+  //cerr << endl;
+}
+
+void OpenCVThread::stop()
+{
+    
+  this->stopped = true;
+  
+  cvReleaseCapture(&this->src);  
   
 }
 
