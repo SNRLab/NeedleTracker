@@ -38,9 +38,14 @@ public:
   qSlicerNeedleTrackerModuleWidget(QWidget *parent=0);
   virtual ~qSlicerNeedleTrackerModuleWidget();
 
+  // 8/20/2012 ayamada
+  int OpenCVswitch;
+  
 public slots:
 
-
+  // 8/20/2012 ayamada
+  void onOpenCVstatusChanged();
+  
 protected:
   QScopedPointer<qSlicerNeedleTrackerModuleWidgetPrivate> d_ptr;
   

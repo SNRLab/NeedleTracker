@@ -22,6 +22,13 @@
 #include "qSlicerNeedleTrackerModuleWidget.h"
 #include "ui_qSlicerNeedleTrackerModule.h"
 
+// 8/20/2012 ayamada
+#include <stdio.h>
+#include <cv.h>
+#include <cxcore.h>
+#include <highgui.h>
+
+
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class qSlicerNeedleTrackerModuleWidgetPrivate: public Ui_qSlicerNeedleTrackerModule
@@ -59,5 +66,63 @@ void qSlicerNeedleTrackerModuleWidget::setup()
   Q_D(qSlicerNeedleTrackerModuleWidget);
   d->setupUi(this);
   this->Superclass::setup();
+  
+  // 8/20/2012 ayamada
+  this->OpenCVswitch = 0;
+  connect(d->OpenCVswitch, SIGNAL(clicked()),
+          this, SLOT(onOpenCVstatusChanged()));
+  
 }
+
+// 8/20/2012 ayamada
+void qSlicerNeedleTrackerModuleWidget::onOpenCVstatusChanged()
+{
+
+  
+  if(this->OpenCVswitch == 0)
+  {
+    /*
+    // 8/20/2012 ayamada
+    // Capture test
+    CvCapture* src = NULL;
+    IplImage *frame;
+    cvNamedWindow("TestCV");
+    
+    //src = cvCaptureFromCAM(0);
+    if((src = cvCreateCameraCapture(0)) == NULL)
+    {
+      cvWaitKey(10);
+    };
+    
+    cvNamedWindow("TestCV", CV_WINDOW_AUTOSIZE);
+    frame = cvQueryFrame(src);
+    cvShowImage("TestCV", frame);
+    
+    
+    while(1)
+    {
+      frame = cvQueryFrame(src);
+      cvShowImage("TestCV", frame);
+    }
+    */
+    
+    this->OpenCVswitch = 1;
+    std::cout << "this->OpenCVswitch =" << this->OpenCVswitch << endl;
+  }else{
+
+    /*
+    // quit
+    cvReleaseCapture(&src);
+    cvReleaseImage(frame);
+    cvDestroyWindow("TestCV");
+    */
+    
+    this->OpenCVswitch = 0;
+    std::cout << "this->OpenCVswitch =" << this->OpenCVswitch << endl;
+  }
+  
+  
+}
+
+
 
