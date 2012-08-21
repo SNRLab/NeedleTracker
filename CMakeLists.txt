@@ -43,19 +43,27 @@ set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_BINARY_DIR}/Logic
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
+  
   ${OpenCV_INCLUDE_DIR}	# by ayamada based on Laurent's contribution 08092012
-  )
+)
 
 set(MODULE_SRCS
   qSlicer${MODULE_NAME}Module.cxx
   qSlicer${MODULE_NAME}Module.h
   qSlicer${MODULE_NAME}ModuleWidget.cxx
   qSlicer${MODULE_NAME}ModuleWidget.h
+  
+  # 8/21/2012 ayamada
+  OpenCVThread.cxx
+  OpenCVThread.h
   )
 
 set(MODULE_MOC_SRCS
   qSlicer${MODULE_NAME}Module.h
   qSlicer${MODULE_NAME}ModuleWidget.h
+  
+  # 8/21/2012 ayamada
+  OpenCVThread.h
   )
 
 set(MODULE_UI_SRCS
@@ -65,6 +73,7 @@ set(MODULE_UI_SRCS
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
+
   ${OpenCV_LIBS} # by ayamada based on Laurent's contribution 08092012
   )
 
