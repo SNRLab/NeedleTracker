@@ -28,6 +28,8 @@
 #include <cxcore.h>
 #include <highgui.h>
 
+//#include "OpenCVThread.h"
+
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate

@@ -23,8 +23,14 @@
 
 #include "qSlicerNeedleTrackerModuleExport.h"
 
+// 8/21/2012 ayamada
+#include "OpenCVThread.h"
+
 class qSlicerNeedleTrackerModuleWidgetPrivate;
 class vtkMRMLNode;
+
+// 8/21/2012 ayamada
+class OpenCVThread;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class Q_SLICER_QTMODULES_NEEDLETRACKER_EXPORT qSlicerNeedleTrackerModuleWidget :
@@ -40,6 +46,7 @@ public:
 
   // 8/20/2012 ayamada
   int OpenCVswitch;
+  OpenCVThread OpenCvthread;
   
 public slots:
 
