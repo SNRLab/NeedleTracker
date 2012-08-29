@@ -92,6 +92,7 @@ void qSlicerNeedleTrackerModuleWidget::setup()
   this->planeOnOffSwitch = 0;
   this->displaySagittal = vtkMRMLModelDisplayNode::New();
   this->displayCoronal = vtkMRMLModelDisplayNode::New();
+  this->displayAxial = vtkMRMLModelDisplayNode::New();
   
   // 8/20/2012 ayamada
   connect(d->OpenCVswitch, SIGNAL(clicked()),
@@ -102,14 +103,12 @@ void qSlicerNeedleTrackerModuleWidget::setup()
 
 void qSlicerNeedleTrackerModuleWidget::CreateTransformationMatrix(vtkMatrix4x4* transformation, int r, int a, int s)
 {
-
   transformation->Identity();
-  transformation->SetElement(r,r,0);
-  transformation->SetElement(2,2,0);
   
-  transformation->SetElement(r,2,1);
-  transformation->SetElement(2,r,-1);
-
+  transformation->SetElement(r,r,s);
+  transformation->SetElement(2,2,s);
+  transformation->SetElement(r,2,a);
+  transformation->SetElement(2,r,-a);
 }
 
 void qSlicerNeedleTrackerModuleWidget::CreateModel
@@ -153,13 +152,12 @@ void qSlicerNeedleTrackerModuleWidget::displayOpenCVPlanes()
   
   if(this->planeOnOffSwitch == 0)
   {
-    this->planeOnOffSwitch++;
 
     //S-I plane setting
     vtkMRMLLinearTransformNode* cvSagittalPlane = vtkMRMLLinearTransformNode::New();
     vtkMatrix4x4* cvSagittalPlaneMatrix = vtkMatrix4x4::New();
     
-    this->CreateTransformationMatrix(cvSagittalPlaneMatrix, 1,0,0);
+    this->CreateTransformationMatrix(cvSagittalPlaneMatrix, 1,1,0);
     cvSagittalPlane->SetAndObserveMatrixTransformToParent(cvSagittalPlaneMatrix);
     cvSagittalPlane->SetName("cvSagittalPlane");
     this->mrmlScene()->AddNode(cvSagittalPlane);
@@ -172,7 +170,7 @@ void qSlicerNeedleTrackerModuleWidget::displayOpenCVPlanes()
     vtkMRMLLinearTransformNode* cvCoronalPlane = vtkMRMLLinearTransformNode::New();
     vtkMatrix4x4* cvCoronalPlaneMatrix = vtkMatrix4x4::New();
   
-    this->CreateTransformationMatrix(cvCoronalPlaneMatrix, 0,0,0);
+    this->CreateTransformationMatrix(cvCoronalPlaneMatrix, 0,1,0);
     cvCoronalPlane->SetAndObserveMatrixTransformToParent(cvCoronalPlaneMatrix);
     cvCoronalPlane->SetName("cvCoronalPlane");
     this->mrmlScene()->AddNode(cvCoronalPlane);
@@ -180,15 +178,42 @@ void qSlicerNeedleTrackerModuleWidget::displayOpenCVPlanes()
 
     cvCoronalPlane->Delete();
     cvCoronalPlaneMatrix->Delete();
+
+    //A-L plane setting
+    vtkMRMLLinearTransformNode* cvAxialPlane = vtkMRMLLinearTransformNode::New();
+    vtkMatrix4x4* cvAxialPlaneMatrix = vtkMatrix4x4::New();
     
-  }else if(this->planeOnOffSwitch == 1){
-    this->displaySagittal->SetVisibility(0);
-    this->displayCoronal->SetVisibility(0);
-    this->planeOnOffSwitch = 2;
-  }else if(this->planeOnOffSwitch == 2){
+    this->CreateTransformationMatrix(cvAxialPlaneMatrix, 0,0,1);
+    cvAxialPlane->SetAndObserveMatrixTransformToParent(cvAxialPlaneMatrix);
+    cvAxialPlane->SetName("cvAxialPlane");
+    this->mrmlScene()->AddNode(cvAxialPlane);
+    this->CreateModel(this->displayAxial, cvAxialPlane);
+    
+    cvAxialPlane->Delete();
+    cvAxialPlaneMatrix->Delete();
+    
+    // display planes
+    this->planeOnOffSwitch = 1;
     this->displaySagittal->SetVisibility(1);
     this->displayCoronal->SetVisibility(1);
+    this->displayAxial->SetVisibility(1);
+    
+  }else if(this->planeOnOffSwitch == 1){
+
+    // hide planes
+    this->displaySagittal->SetVisibility(0);
+    this->displayCoronal->SetVisibility(0);
+    this->displayAxial->SetVisibility(0);
+    this->planeOnOffSwitch = 2;
+
+  }else if(this->planeOnOffSwitch == 2){
+
+    // display planes
+    this->displaySagittal->SetVisibility(1);
+    this->displayCoronal->SetVisibility(1);
+    this->displayAxial->SetVisibility(1);
     this->planeOnOffSwitch = 1;
+
   }
   
 }

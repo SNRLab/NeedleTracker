@@ -87,6 +87,7 @@ public:
   int planeOnOffSwitch;
   vtkMRMLModelDisplayNode *displaySagittal;
   vtkMRMLModelDisplayNode *displayCoronal;
+  vtkMRMLModelDisplayNode *displayAxial;
   
   void CreateTransformationMatrix(vtkMatrix4x4*, int, int, int);
   void CreateModel(vtkMRMLModelDisplayNode *, vtkMRMLLinearTransformNode*);
