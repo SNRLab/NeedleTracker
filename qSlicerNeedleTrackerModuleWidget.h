@@ -88,6 +88,9 @@ public:
   vtkMRMLModelDisplayNode *displaySagittal;
   vtkMRMLModelDisplayNode *displayCoronal;
   
+  void CreateTransformationMatrix(vtkMatrix4x4*, int, int, int);
+  void CreateModel(vtkMRMLModelDisplayNode *, vtkMRMLLinearTransformNode*);
+  
   // Use OpenCVThread class
   OpenCVThread OpenCVthread;
     

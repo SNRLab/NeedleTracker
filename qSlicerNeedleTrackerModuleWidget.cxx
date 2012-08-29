@@ -100,6 +100,49 @@ void qSlicerNeedleTrackerModuleWidget::setup()
           this, SLOT(displayOpenCVPlane()));  
 }
 
+void qSlicerNeedleTrackerModuleWidget::CreateTransformationMatrix(vtkMatrix4x4* transformation, int r, int a, int s)
+{
+
+  transformation->Identity();
+  transformation->SetElement(r,r,0);
+  transformation->SetElement(2,2,0);
+  
+  transformation->SetElement(r,2,1);
+  transformation->SetElement(2,r,-1);
+
+}
+
+void qSlicerNeedleTrackerModuleWidget::CreateModel
+(vtkMRMLModelDisplayNode *display, vtkMRMLLinearTransformNode* transform)
+{
+
+  vtkMRMLModelNode* model = vtkMRMLModelNode::New();
+  vtkPlaneSource* plane = vtkPlaneSource::New();
+  
+  plane->SetPoint1(128,0,0);// (width,0,0)
+  plane->SetPoint2(0,128,0);// (0,height,0)
+  plane->SetCenter(0,0,0);
+  plane->Update();
+  
+  model->SetAndObservePolyData(plane->GetOutput());
+  display->SetPolyData(model->GetPolyData());
+  
+  this->mrmlScene()->SaveStateForUndo();
+  this->mrmlScene()->AddNode(display);
+  this->mrmlScene()->AddNode(model);
+  display->SetScene(this->mrmlScene());
+  model->SetScene(this->mrmlScene());
+  model->SetAndObserveDisplayNodeID(display->GetID());
+  model->SetHideFromEditors(0);
+  model->SetAndObserveTransformNodeID(transform->GetID());
+  
+  display->SetAmbient(70);
+  display->SetDiffuse(100);
+  
+  model->Delete();
+  plane->Delete();  
+  
+}
 
 // 8/28/2012 ayamada
 void qSlicerNeedleTrackerModuleWidget::displayOpenCVPlanes()
@@ -112,89 +155,32 @@ void qSlicerNeedleTrackerModuleWidget::displayOpenCVPlanes()
   {
     this->planeOnOffSwitch++;
 
+    //S-I plane setting
     vtkMRMLLinearTransformNode* cvSagittalPlane = vtkMRMLLinearTransformNode::New();
     vtkMatrix4x4* cvSagittalPlaneMatrix = vtkMatrix4x4::New();
     
-    cvSagittalPlaneMatrix->Identity();
-  
+    this->CreateTransformationMatrix(cvSagittalPlaneMatrix, 1,0,0);
     cvSagittalPlane->SetAndObserveMatrixTransformToParent(cvSagittalPlaneMatrix);
     cvSagittalPlane->SetName("cvSagittalPlane");
     this->mrmlScene()->AddNode(cvSagittalPlane);
-    
-    {
-      vtkMRMLModelNode* model = vtkMRMLModelNode::New();
-    
-      vtkPlaneSource* plane = vtkPlaneSource::New();
-      plane->SetPoint1(128,0,0);// (width,0,0)
-      plane->SetPoint2(0,128,0);// (0,height,0)
-      plane->SetCenter(0,0,0);
-      plane->Update();
-    
-      model->SetAndObservePolyData(plane->GetOutput());
-      this->displaySagittal->SetPolyData(model->GetPolyData());
-    
-      this->mrmlScene()->SaveStateForUndo();
-      this->mrmlScene()->AddNode(this->displaySagittal);
-      this->mrmlScene()->AddNode(model);
-      this->displaySagittal->SetScene(this->mrmlScene());
-      model->SetScene(this->mrmlScene());
-      model->SetAndObserveDisplayNodeID(this->displaySagittal->GetID());
-      model->SetHideFromEditors(0);
-      model->SetAndObserveTransformNodeID(cvSagittalPlane->GetID());
-    
-      this->displaySagittal->SetAmbient(70);
-      this->displaySagittal->SetDiffuse(100);
-    
-      model->Delete();
-      plane->Delete();
-    }   
-    
+    this->CreateModel(this->displaySagittal, cvSagittalPlane);    
+
     cvSagittalPlane->Delete();
     cvSagittalPlaneMatrix->Delete();
   
+    //R-L plane setting
     vtkMRMLLinearTransformNode* cvCoronalPlane = vtkMRMLLinearTransformNode::New();
     vtkMatrix4x4* cvCoronalPlaneMatrix = vtkMatrix4x4::New();
   
-    cvCoronalPlaneMatrix->Identity();
-    cvCoronalPlaneMatrix->SetElement(0,0,0);
-    cvCoronalPlaneMatrix->SetElement(0,2,1);
-    cvCoronalPlaneMatrix->SetElement(2,0,-1);
-    cvCoronalPlaneMatrix->SetElement(2,2,0);
-  
+    this->CreateTransformationMatrix(cvCoronalPlaneMatrix, 0,0,0);
     cvCoronalPlane->SetAndObserveMatrixTransformToParent(cvCoronalPlaneMatrix);
     cvCoronalPlane->SetName("cvCoronalPlane");
     this->mrmlScene()->AddNode(cvCoronalPlane);
-    
-    {
-      vtkMRMLModelNode* model = vtkMRMLModelNode::New();
-      
-      vtkPlaneSource* plane = vtkPlaneSource::New();
-      plane->SetPoint1(128,0,0);// (width,0,0)
-      plane->SetPoint2(0,128,0);// (0,height,0)
-      plane->SetCenter(0,0,0);
-      plane->Update();
-      
-      model->SetAndObservePolyData(plane->GetOutput());
-      this->displayCoronal->SetPolyData(model->GetPolyData());
-      
-      this->mrmlScene()->SaveStateForUndo();
-      this->mrmlScene()->AddNode(this->displayCoronal);
-      this->mrmlScene()->AddNode(model);
-      this->displayCoronal->SetScene(this->mrmlScene());
-      model->SetScene(this->mrmlScene());
-      model->SetAndObserveDisplayNodeID(this->displayCoronal->GetID());
-      model->SetHideFromEditors(0);
-      model->SetAndObserveTransformNodeID(cvCoronalPlane->GetID());
-      
-      this->displayCoronal->SetAmbient(70);
-      this->displayCoronal->SetDiffuse(100);
-      
-      model->Delete();
-      plane->Delete();
-    }   
-    
+    this->CreateModel(this->displayCoronal, cvCoronalPlane);
+
     cvCoronalPlane->Delete();
     cvCoronalPlaneMatrix->Delete();
+    
   }else if(this->planeOnOffSwitch == 1){
     this->displaySagittal->SetVisibility(0);
     this->displayCoronal->SetVisibility(0);
