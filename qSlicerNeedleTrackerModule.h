@@ -23,6 +23,18 @@
 
 #include "qSlicerNeedleTrackerModuleExport.h"
 
+/*
+// 8/27/2012 ayamada
+#include "vtkCubeSource.h"
+#include "vtkPlaneSource.h"
+#include "vtkActor.h"
+#include "vtkImageImport.h"
+#include "vtkMath.h" 
+#include "vtkPolyDataMapper.h"
+#include "vtkCamera.h"
+*/
+
+
 class qSlicerNeedleTrackerModulePrivate;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
@@ -49,6 +61,19 @@ public:
 
   virtual QStringList categories()const;
   virtual QStringList dependencies() const;
+  
+  /*
+  // 8/27/2012 ayamada
+  vtkPlaneSource* FocalPlaneSource; 
+  vtkPolyDataMapper* FocalPlaneMapper;
+  vtkMatrix4x4* ExtrinsicMatrix;
+  vtkTexture* atext; 
+  vtkActor* actor;                 
+  vtkImageImport* importer;  
+  double planeRatio;
+  vtkCamera* fileCamera;
+  */
+  
 
 protected:
 

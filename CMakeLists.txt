@@ -52,7 +52,10 @@ set(MODULE_SRCS
   qSlicer${MODULE_NAME}Module.h
   qSlicer${MODULE_NAME}ModuleWidget.cxx
   qSlicer${MODULE_NAME}ModuleWidget.h
-  
+
+  # 8/28/2012 ayamada
+  #vtkCvPlane.cxx
+  #vtkCvPlane.h
   # 8/21/2012 ayamada
   #OpenCVThread.cxx
   #OpenCVThread.h

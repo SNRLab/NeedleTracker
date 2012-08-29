@@ -18,9 +18,12 @@
 #ifndef __qSlicerNeedleTrackerModuleWidget_h
 #define __qSlicerNeedleTrackerModuleWidget_h
 
+// 8/28/2012 ayamada
+// CTK includes
+#include <ctkVTKObject.h>
+
 // SlicerQt includes
 #include "qSlicerAbstractModuleWidget.h"
-
 #include "qSlicerNeedleTrackerModuleExport.h"
 
 // 8/21/2012 ayamada
@@ -30,14 +33,21 @@
 #include <QSemaphore.h>
 #include <QWaitCondition.h>
 
-
 #include <stdio.h>
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
 
+#include <vtkMRMLScene.h>
+#include <vtkMRMLModelNode.h>
+#include <vtkMRMLModelDisplayNode.h>
+#include <vtkMRMLLinearTransformNode.h>
+
 class qSlicerNeedleTrackerModuleWidgetPrivate;
 class vtkMRMLNode;
+class vtkMRMLScalarVolumeNode;
+class vtkMRMLViewNode;
+class vtkMRMLInteractionNode;
 
 // 8/21/2012 ayamada
 // QThread class to use OpenCV with thread
@@ -54,16 +64,13 @@ public:
   CvCapture* src;
   IplImage* frame;
 
-  
 protected:
   void run();
   
 private:
   QString messageStr;
   volatile bool stopped;
-  
 };
-
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class Q_SLICER_QTMODULES_NEEDLETRACKER_EXPORT qSlicerNeedleTrackerModuleWidget :
@@ -77,14 +84,17 @@ public:
   qSlicerNeedleTrackerModuleWidget(QWidget *parent=0);
   virtual ~qSlicerNeedleTrackerModuleWidget();
 
-  // 8/20/2012 ayamada
-  // use of OpenCVThread class
+  int planeOnOffSwitch;
+  vtkMRMLModelDisplayNode *displaySagittal;
+  vtkMRMLModelDisplayNode *displayCoronal;
+  
+  // Use OpenCVThread class
   OpenCVThread OpenCVthread;
-
+    
 public slots:
 
-  // 8/20/2012 ayamada
   void startOrStopOpenCVThread();
+  void displayOpenCVPlanes();  
   
 protected:
   QScopedPointer<qSlicerNeedleTrackerModuleWidgetPrivate> d_ptr;
@@ -95,6 +105,8 @@ private:
   Q_DECLARE_PRIVATE(qSlicerNeedleTrackerModuleWidget);
   Q_DISABLE_COPY(qSlicerNeedleTrackerModuleWidget);
 };
+
+
 
 
 #endif

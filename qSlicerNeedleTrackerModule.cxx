@@ -25,6 +25,16 @@
 #include "qSlicerNeedleTrackerModule.h"
 #include "qSlicerNeedleTrackerModuleWidget.h"
 
+/*
+// 8/27/2012 ayamada
+#include <vtkSmartPointer.h>
+#include <vtkTransform.h>
+#include <vtkTransformFilter.h>
+#include <vtkGeometryFilter.h>
+#include "vtkTransformPolyDataFilter.h"
+#include "vtkAppendPolyData.h"
+*/
+
 //-----------------------------------------------------------------------------
 Q_EXPORT_PLUGIN2(qSlicerNeedleTrackerModule, qSlicerNeedleTrackerModule);
 
@@ -52,6 +62,23 @@ qSlicerNeedleTrackerModule::qSlicerNeedleTrackerModule(QObject* _parent)
   : Superclass(_parent)
   , d_ptr(new qSlicerNeedleTrackerModulePrivate)
 {
+  
+  /*
+  // 8/27/2012 ayamada
+  // Initialization
+  this->FocalPlaneSource = vtkPlaneSource::New(); 
+  this->FocalPlaneMapper = vtkPolyDataMapper::New();//NULL;
+  this->ExtrinsicMatrix = vtkMatrix4x4::New();
+  this->atext = vtkTexture::New(); 
+  this->actor = vtkActor::New();//NULL;                 
+  this->importer = vtkImageImport::New();//NULL; 
+  //this->captureImageTmp2 = NULL;    
+  //this->RGBImage2 = NULL; 
+  //this->idata = NULL;
+  this->planeRatio = NULL;
+  this->fileCamera = vtkCamera::New();
+  */
+  
 }
 
 //-----------------------------------------------------------------------------

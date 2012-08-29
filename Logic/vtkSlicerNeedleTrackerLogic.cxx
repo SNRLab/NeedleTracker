@@ -32,6 +32,27 @@ vtkStandardNewMacro(vtkSlicerNeedleTrackerLogic);
 //----------------------------------------------------------------------------
 vtkSlicerNeedleTrackerLogic::vtkSlicerNeedleTrackerLogic()
 {
+  
+  // 8/28/2012 ayamada
+  // setup to display vtk object to Slicer viewer
+  
+  this->planeDisp = vtkMRMLModelDisplayNode::New();
+  this->planeModel = vtkMRMLModelNode::New();
+  
+  this->FocalPlaneSource = vtkPlaneSource::New();
+  this->FocalPlaneMapper = vtkPolyDataMapper::New();
+  this->ExtrinsicMatrix = vtkMatrix4x4::New();
+  this->actor = vtkActor::New();
+
+  this->FocalPlaneMapper->SetInput(this->FocalPlaneSource->GetOutput());
+  this->actor->SetMapper(this->FocalPlaneMapper);
+  this->actor->SetUserMatrix(this->ExtrinsicMatrix);
+  //this->actor->SetTexture(this->atext);
+  
+  //this->GetMRMLScene()->AddNode(this->planeDisp);
+  //this->GetMRMLScene()->AddNode(this->planeModel);
+
+  
 }
 
 //----------------------------------------------------------------------------
@@ -77,5 +98,41 @@ void vtkSlicerNeedleTrackerLogic
 void vtkSlicerNeedleTrackerLogic
 ::OnMRMLSceneNodeRemoved(vtkMRMLNode* vtkNotUsed(node))
 {
+}
+
+
+//-----------------------------------------------------------------------------
+//
+//
+// MRML event handling: Based on vtkSlicerAnnotationModuleLogic.cxx
+//
+//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+void vtkSlicerNeedleTrackerLogic::ProcessMRMLNodesEvents(vtkObject *caller,
+                                                            unsigned long event,
+                                                            void *callData)
+{
+  vtkDebugMacro("ProcessMRMLNodesEvents: Event "<< event);  
+  vtkMRMLNode* node = reinterpret_cast<vtkMRMLNode*> (callData);
+  
+  vtkMRMLModelNode* PlaneNode = vtkMRMLModelNode::SafeDownCast(node);
+  
+  this->GetMRMLScene()->AddNode(this->planeDisp);
+  this->GetMRMLScene()->AddNode(this->planeModel);
+  
+  this->planeDisp->SetScene(GetMRMLScene());
+  
+  this->planeModel->SetName("test");
+  this->planeModel->SetScene(GetMRMLScene());
+  //this->planeDisp->SetAndObserveTextureImageData(this->importer->GetOutput());  
+  this->planeModel->SetAndObservePolyData(this->FocalPlaneSource->GetOutput());
+  
+  this->planeModel->SetAndObserveDisplayNodeID(planeDisp->GetID());
+  this->planeModel->SetHideFromEditors(0);
+  
+  
+  
 }
 

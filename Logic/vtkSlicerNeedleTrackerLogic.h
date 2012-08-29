@@ -35,6 +35,26 @@
 #include "vtkSlicerNeedleTrackerModuleLogicExport.h"
 
 
+// 8/27/2012 ayamada
+#include "vtkMRMLModelNode.h"
+#include "vtkMRMLModelDisplayNode.h"
+
+// 8/27/2012 ayamada
+#include <vtkSmartPointer.h>
+#include <vtkTransform.h>
+#include <vtkTransformFilter.h>
+#include <vtkGeometryFilter.h>
+#include "vtkTransformPolyDataFilter.h"
+#include "vtkAppendPolyData.h"
+
+#include "vtkCubeSource.h"
+#include "vtkPlaneSource.h"
+#include "vtkActor.h"
+#include "vtkImageImport.h"
+#include "vtkMath.h" 
+#include "vtkPolyDataMapper.h"
+#include "vtkCamera.h"
+
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class VTK_SLICER_NEEDLETRACKER_MODULE_LOGIC_EXPORT vtkSlicerNeedleTrackerLogic :
   public vtkSlicerModuleLogic
@@ -44,6 +64,21 @@ public:
   static vtkSlicerNeedleTrackerLogic *New();
   vtkTypeMacro(vtkSlicerNeedleTrackerLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
+
+  // 8/28/2012 ayamada
+  vtkMRMLModelNode           *planeModel;
+  vtkMRMLModelDisplayNode    *planeDisp;
+  
+  // 8/28/2012 ayamada  
+  vtkPlaneSource* FocalPlaneSource; 
+  vtkPolyDataMapper* FocalPlaneMapper;
+  vtkMatrix4x4* ExtrinsicMatrix;
+  vtkTexture* atext; 
+  vtkActor* actor;                 
+  vtkImageImport* importer;  
+  double planeRatio;
+  vtkCamera* fileCamera;
+   
 
 protected:
   vtkSlicerNeedleTrackerLogic();
@@ -55,6 +90,13 @@ protected:
   virtual void UpdateFromMRMLScene();
   virtual void OnMRMLSceneNodeAdded(vtkMRMLNode* node);
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
+  
+  // 8/28/2012 ayamada
+  virtual void ProcessMRMLNodesEvents(vtkObject *caller,
+                                      unsigned long event,
+                                      void *callData );
+  
+  
 private:
 
   vtkSlicerNeedleTrackerLogic(const vtkSlicerNeedleTrackerLogic&); // Not implemented
