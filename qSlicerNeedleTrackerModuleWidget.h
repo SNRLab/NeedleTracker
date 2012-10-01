@@ -33,21 +33,32 @@
 #include <QSemaphore.h>
 #include <QWaitCondition.h>
 
+
 #include <stdio.h>
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
 
+/*
+#include "opencv2/video/tracking.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
+*/
 #include <vtkMRMLScene.h>
 #include <vtkMRMLModelNode.h>
 #include <vtkMRMLModelDisplayNode.h>
 #include <vtkMRMLLinearTransformNode.h>
+
+#include <vtkImageImport.h>
+#include <vtkTexture.h>
+
 
 class qSlicerNeedleTrackerModuleWidgetPrivate;
 class vtkMRMLNode;
 class vtkMRMLScalarVolumeNode;
 class vtkMRMLViewNode;
 class vtkMRMLInteractionNode;
+
 
 // 8/21/2012 ayamada
 // QThread class to use OpenCV with thread
@@ -63,6 +74,15 @@ public:
   
   CvCapture* src;
   IplImage* frame;
+  
+  // 9/30/2012 ayamada
+  CvSize imageSize;
+  IplImage* captureImage;
+  IplImage* RGBImage;
+  IplImage* captureImageTmp;
+  vtkTexture *atext;// = vtkTexture::New();
+  vtkImageImport *importer;// = vtkImageImport::New();  
+  //VideoCapture cap;
 
 protected:
   void run();

@@ -118,6 +118,11 @@ void qSlicerNeedleTrackerModuleWidget::CreateModel
   vtkMRMLModelNode* model = vtkMRMLModelNode::New();
   vtkPlaneSource* plane = vtkPlaneSource::New();
   
+  // 9/30/2012 ayamada
+  //vtkTexture *atext = vtkTexture::New();
+  //vtkImageImport *
+  //importer = vtkImageImport::New();
+  
   plane->SetPoint1(128,0,0);// (width,0,0)
   plane->SetPoint2(0,128,0);// (0,height,0)
   plane->SetCenter(0,0,0);
@@ -250,15 +255,53 @@ OpenCVThread::OpenCVThread()
 // 8/21/2012 ayamada: thread for capturing
 void OpenCVThread::run()
 {
+  
+  // 9/30/2012 ayamada
+  unsigned char* idata = NULL;
+  this->frame = NULL;
+  this->importer = NULL;
+    
   // Capture test loop 
   if((this->src = cvCreateCameraCapture(0)) != NULL)
   { 
-    this->frame = cvQueryFrame(this->src);
+    cout << "Capturing is starting...\n";
+    
+    this->frame = cvCreateImage(cvSize(640,480), IPL_DEPTH_8U,3);//cvQueryFrame(this->src);
     
     while (!this->stopped)
     {
-      this->frame = cvQueryFrame(this->src);
+            
+      //this->frame = cvQueryFrame(this->src);
+      
+      // 9/30/2012 ayamada: describ the reading part of images 
+      this->imageSize = cvGetSize( this->frame );
+      
+      
+      this->captureImage = cvCreateImage(this->imageSize, IPL_DEPTH_8U,3);
+      this->captureImageTmp = cvCreateImage(this->imageSize, IPL_DEPTH_8U,3);
+      this->RGBImage = cvCreateImage(this->imageSize, IPL_DEPTH_8U, 3);
+      imageSize = cvGetSize( captureImageTmp );
+      cvFlip(this->captureImageTmp, this->captureImage, 0);
+      cvCvtColor( this->captureImage, this->RGBImage, CV_BGR2RGB);
+      
+      idata = (unsigned char*) this->RGBImage->imageData;
+      this->importer->SetWholeExtent(0,this->imageSize.width-1,0,this->imageSize.height-1,0,0);
+      
+      /*
+      this->importer->SetDataExtentToWholeExtent();
+      this->importer->SetDataScalarTypeToUnsignedChar();
+      this->importer->SetNumberOfScalarComponents(3);
+      this->importer->SetImportVoidPointer(idata);
+      this->atext->SetInputConnection(this->importer->GetOutputPort());
+      this->atext->InterpolateOn();
+      this->importer->Update();
+      */
+       //break;
+      
+      
     }
+  }else{
+    cout << "Capturing is not starting...\n";
   }
   this->stopped = false;
 }
@@ -266,6 +309,7 @@ void OpenCVThread::run()
 void OpenCVThread::stop()
 {    
   this->stopped = true;
+  
   cvReleaseCapture(&this->src);  
 }
 
