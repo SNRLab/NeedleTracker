@@ -72,8 +72,8 @@ public:
   void setMessage(const QString &message);
   void stop();
   
-  CvCapture* src;
-  IplImage* frame;
+  CvCapture *src;
+  IplImage *frame;
   
   // 9/30/2012 ayamada
   CvSize imageSize;

@@ -258,23 +258,32 @@ void OpenCVThread::run()
   
   // 9/30/2012 ayamada
   unsigned char* idata = NULL;
-  this->frame = NULL;
-  this->importer = NULL;
-    
+  //this->frame = 0;
+  this->importer = vtkImageImport::New();
+  //this->importer = NULL;
+  this->src = NULL;
+  
+  //CvCapture *src2;
+  
   // Capture test loop 
   if((this->src = cvCreateCameraCapture(0)) != NULL)
   { 
     cout << "Capturing is starting...\n";
-    
-    this->frame = cvCreateImage(cvSize(640,480), IPL_DEPTH_8U,3);//cvQueryFrame(this->src);
+    cvWaitKey(500);
+    this->frame = cvQueryFrame(this->src);
     
     while (!this->stopped)
     {
             
-      //this->frame = cvQueryFrame(this->src);
+      this->frame = cvQueryFrame(this->src);
+      
       
       // 9/30/2012 ayamada: describ the reading part of images 
-      this->imageSize = cvGetSize( this->frame );
+      this->imageSize = cvSize
+      (//cvGetSize( this->frame );
+       (int)cvGetCaptureProperty(this->src,CV_CAP_PROP_FRAME_WIDTH ),
+       (int)cvGetCaptureProperty(this->src,CV_CAP_PROP_FRAME_HEIGHT )
+       );
       
       
       this->captureImage = cvCreateImage(this->imageSize, IPL_DEPTH_8U,3);
