@@ -46,7 +46,7 @@
 #include <vtkMRMLScene.h>
 #include <vtkMatrix4x4.h>
 #include <vtkSphereSource.h>
-#include <vtkPlaneSource.h>
+
 #include <vtkCollection.h>
 #include <vtkNew.h>
 
@@ -72,8 +72,7 @@ qSlicerNeedleTrackerModuleWidgetPrivate::qSlicerNeedleTrackerModuleWidgetPrivate
 // qSlicerNeedleTrackerModuleWidget methods
 //-----------------------------------------------------------------------------
 qSlicerNeedleTrackerModuleWidget::qSlicerNeedleTrackerModuleWidget(QWidget* _parent)
-  : Superclass( _parent )
-  , d_ptr( new qSlicerNeedleTrackerModuleWidgetPrivate() )
+  : Superclass( _parent ), d_ptr( new qSlicerNeedleTrackerModuleWidgetPrivate())
 {
 }
 
@@ -93,6 +92,12 @@ void qSlicerNeedleTrackerModuleWidget::setup()
   this->displaySagittal = vtkMRMLModelDisplayNode::New();
   this->displayCoronal = vtkMRMLModelDisplayNode::New();
   this->displayAxial = vtkMRMLModelDisplayNode::New();
+  
+  // 10/1/2012 ayamada: for viewer
+  this->actor = vtkActor::New();
+  this->FocalPlaneMapper = vtkPolyDataMapper::New();
+  this->viewerPlane = vtkPlaneSource::New();
+  this->testvariable = 0;
   
   // 8/20/2012 ayamada
   connect(d->OpenCVswitch, SIGNAL(clicked()),
@@ -116,19 +121,21 @@ void qSlicerNeedleTrackerModuleWidget::CreateModel
 {
 
   vtkMRMLModelNode* model = vtkMRMLModelNode::New();
-  vtkPlaneSource* plane = vtkPlaneSource::New();
+  //vtkPlaneSource* plane = vtkPlaneSource::New();
   
   // 9/30/2012 ayamada
   //vtkTexture *atext = vtkTexture::New();
   //vtkImageImport *
   //importer = vtkImageImport::New();
   
-  plane->SetPoint1(128,0,0);// (width,0,0)
-  plane->SetPoint2(0,128,0);// (0,height,0)
-  plane->SetCenter(0,0,0);
-  plane->Update();
+  this->viewerPlane->SetPoint1(128,-128,0);// (width,0,0)
+  this->viewerPlane->SetPoint2(-128,128,0);// (0,height,0)
+  this->viewerPlane->SetCenter(0,0,0);
+  this->viewerPlane->SetOrigin(-128,-128,0);
   
-  model->SetAndObservePolyData(plane->GetOutput());
+  this->viewerPlane->Update();
+  
+  model->SetAndObservePolyData(this->viewerPlane->GetOutput());
   display->SetPolyData(model->GetPolyData());
   
   this->mrmlScene()->SaveStateForUndo();
@@ -144,7 +151,7 @@ void qSlicerNeedleTrackerModuleWidget::CreateModel
   display->SetDiffuse(100);
   
   model->Delete();
-  plane->Delete();  
+  //this->viewerPlane->Delete();  
   
 }
 
@@ -255,15 +262,15 @@ OpenCVThread::OpenCVThread()
 // 8/21/2012 ayamada: thread for capturing
 void OpenCVThread::run()
 {
-  
+    
   // 9/30/2012 ayamada
   unsigned char* idata = NULL;
-  //this->frame = 0;
   this->importer = vtkImageImport::New();
-  //this->importer = NULL;
+  this->atext = vtkTexture::New();
+  this->importer = vtkImageImport::New();
   this->src = NULL;
   
-  //CvCapture *src2;
+  // 10/1/2012 ayamada
   
   // Capture test loop 
   if((this->src = cvCreateCameraCapture(0)) != NULL)
@@ -272,19 +279,27 @@ void OpenCVThread::run()
     cvWaitKey(500);
     this->frame = cvQueryFrame(this->src);
     
+    // 10/2/2012 ayamada: create VTK structures
+    //wp->planeRatio = VIEW_SIZE_X / VIEW_SIZE_Y;
+    //wp->CameraFocusPlane(wp->fileCamera, wp->planeRatio);
+    ///wp->FocalPlaneMapper->SetInput(wp->viewerPlane->GetOutput());
+    mutex.lock();
+    //wp->actor->SetMapper(wp->FocalPlaneMapper);
+    //wp->testvariable = 1;
+    mutex.unlock();
+    //wp->actor->SetUserMatrix(wp->ExtrinsicMatrix);
+    //wp->actor->SetTexture(wp->atext);
+    
     while (!this->stopped)
     {
             
-      this->frame = cvQueryFrame(this->src);
-      
-      
-      // 9/30/2012 ayamada: describ the reading part of images 
+      // 9/30/2012 ayamada: describ the reading part of images       
+      this->frame = cvQueryFrame(this->src);            
       this->imageSize = cvSize
-      (//cvGetSize( this->frame );
+      (
        (int)cvGetCaptureProperty(this->src,CV_CAP_PROP_FRAME_WIDTH ),
        (int)cvGetCaptureProperty(this->src,CV_CAP_PROP_FRAME_HEIGHT )
-       );
-      
+      );
       
       this->captureImage = cvCreateImage(this->imageSize, IPL_DEPTH_8U,3);
       this->captureImageTmp = cvCreateImage(this->imageSize, IPL_DEPTH_8U,3);
@@ -295,8 +310,6 @@ void OpenCVThread::run()
       
       idata = (unsigned char*) this->RGBImage->imageData;
       this->importer->SetWholeExtent(0,this->imageSize.width-1,0,this->imageSize.height-1,0,0);
-      
-      /*
       this->importer->SetDataExtentToWholeExtent();
       this->importer->SetDataScalarTypeToUnsignedChar();
       this->importer->SetNumberOfScalarComponents(3);
@@ -304,9 +317,7 @@ void OpenCVThread::run()
       this->atext->SetInputConnection(this->importer->GetOutputPort());
       this->atext->InterpolateOn();
       this->importer->Update();
-      */
-       //break;
-      
+      break;
       
     }
   }else{
@@ -318,8 +329,7 @@ void OpenCVThread::run()
 void OpenCVThread::stop()
 {    
   this->stopped = true;
-  
-  cvReleaseCapture(&this->src);  
+  cvReleaseCapture(&this->src);
 }
 
 

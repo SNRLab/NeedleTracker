@@ -52,13 +52,17 @@
 #include <vtkImageImport.h>
 #include <vtkTexture.h>
 
+#include <vtkActor.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkPlaneSource.h>
+
 
 class qSlicerNeedleTrackerModuleWidgetPrivate;
 class vtkMRMLNode;
 class vtkMRMLScalarVolumeNode;
 class vtkMRMLViewNode;
 class vtkMRMLInteractionNode;
-
+class qSlicerNeedleTrackerModuleWidget;
 
 // 8/21/2012 ayamada
 // QThread class to use OpenCV with thread
@@ -67,6 +71,7 @@ class OpenCVThread : public QThread
   Q_OBJECT
   
 public:
+  //OpenCVThread(qSlicerNeedleTrackerModuleWidget* wp);
   OpenCVThread();
   
   void setMessage(const QString &message);
@@ -75,20 +80,22 @@ public:
   CvCapture *src;
   IplImage *frame;
   
+  qSlicerNeedleTrackerModuleWidget* wp;
+  
   // 9/30/2012 ayamada
   CvSize imageSize;
   IplImage* captureImage;
   IplImage* RGBImage;
   IplImage* captureImageTmp;
-  vtkTexture *atext;// = vtkTexture::New();
-  vtkImageImport *importer;// = vtkImageImport::New();  
-  //VideoCapture cap;
-
+  vtkTexture *atext;
+  vtkImageImport *importer;
+  
 protected:
   void run();
   
 private:
   QString messageStr;
+  QMutex mutex;
   volatile bool stopped;
 };
 
@@ -111,6 +118,13 @@ public:
   
   void CreateTransformationMatrix(vtkMatrix4x4*, int, int, int);
   void CreateModel(vtkMRMLModelDisplayNode *, vtkMRMLLinearTransformNode*);
+  
+  // 10/1/2012 ayamada: viewer
+  vtkActor *actor;
+  vtkPolyDataMapper *FocalPlaneMapper;
+  vtkPlaneSource* viewerPlane;
+  
+  int testvariable;
   
   // Use OpenCVThread class
   OpenCVThread OpenCVthread;
