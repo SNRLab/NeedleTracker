@@ -82,9 +82,9 @@ public:
   
   // 9/30/2012 ayamada
   CvSize imageSize;
-  IplImage* captureImage;
-  IplImage* RGBImage;
-  IplImage* captureImageTmp;
+  //IplImage* captureImage;
+  //IplImage* RGBImage;
+  //IplImage* captureImageTmp;
   vtkTexture *atext;
   vtkImageImport *importer;
   
@@ -136,6 +136,7 @@ public:
   int threadFlag;
 //  int makeCameraThread(const char* );
 //  vtkCamera* fileCamera;
+  vtkTexture *atext;
   
     
 public slots:

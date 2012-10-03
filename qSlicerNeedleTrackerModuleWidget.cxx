@@ -136,7 +136,7 @@ void qSlicerNeedleTrackerModuleWidget::CreateModel
   //vtkPlaneSource* plane = vtkPlaneSource::New();
   
   // 9/30/2012 ayamada
-  //vtkTexture *atext = vtkTexture::New();
+  vtkTexture *atext = vtkTexture::New();
   //vtkImageImport *
   //importer = vtkImageImport::New();
   
@@ -161,6 +161,7 @@ void qSlicerNeedleTrackerModuleWidget::CreateModel
   
   display->SetAmbient(70);
   display->SetDiffuse(100);
+  
   
   model->Delete();
   //this->viewerPlane->Delete();  
@@ -240,6 +241,16 @@ void qSlicerNeedleTrackerModuleWidget::displayOpenCVPlanes()
 
   }
   
+  
+  // 10/2/2012 ayamada
+  vtkMatrix4x4 * ExtrinsicMatrix = vtkMatrix4x4::New();
+  ExtrinsicMatrix->Identity();
+  this->FocalPlaneMapper->SetInput(this->viewerPlane->GetOutput());
+  this->actor->SetMapper(this->FocalPlaneMapper);
+  this->actor->SetUserMatrix(ExtrinsicMatrix);
+  this->actor->SetTexture(this->atext);
+  
+  
 }
 
 // 8/20/2012 ayamada
@@ -298,9 +309,9 @@ void *qSlicerNeedleTrackerModuleWidget::thread_CVThread(void* t)
   unsigned char* idata;
   CvSize imageSize;
   IplImage* captureImage;
-  IplImage* RGBImage;
   IplImage* captureImageTmp;
-  vtkTexture *atext = vtkTexture::New();
+  IplImage* rgbImage;
+  //vtkTexture *atext = vtkTexture::New();
   vtkImageImport *importer = vtkImageImport::New();
   
   // Capture test loop 
@@ -315,28 +326,35 @@ void *qSlicerNeedleTrackerModuleWidget::thread_CVThread(void* t)
       
       // 9/30/2012 ayamada: describ the reading part of images       
       frame = cvQueryFrame(src);            
+      
       imageSize = cvSize
       (
        (int)cvGetCaptureProperty(src,CV_CAP_PROP_FRAME_WIDTH ),
        (int)cvGetCaptureProperty(src,CV_CAP_PROP_FRAME_HEIGHT )
-       );
+      );
       
       captureImage = cvCreateImage(imageSize, IPL_DEPTH_8U,3);
       captureImageTmp = cvCreateImage(imageSize, IPL_DEPTH_8U,3);
-      RGBImage = cvCreateImage(imageSize, IPL_DEPTH_8U, 3);
-      imageSize = cvGetSize( captureImageTmp );
-      cvFlip(captureImageTmp, captureImage, 0);
-      cvCvtColor(captureImage, RGBImage, CV_BGR2RGB);
+      rgbImage = cvCreateImage(imageSize, IPL_DEPTH_8U, 3);
       
+      pw->vtkmutex->Lock();
+      
+      
+      //imageSize = cvGetSize( captureImageTmp );
+      //cvFlip(captureImageTmp, captureImage, 0);
+      //cvCvtColor(captureImage, RGBImage, CV_BGR2RGB);
+      /*
       idata = (unsigned char*) RGBImage->imageData;
       importer->SetWholeExtent(0,imageSize.width-1,0,imageSize.height-1,0,0);
       importer->SetDataExtentToWholeExtent();
       importer->SetDataScalarTypeToUnsignedChar();
       importer->SetNumberOfScalarComponents(3);
       importer->SetImportVoidPointer(idata);
-      atext->SetInputConnection(importer->GetOutputPort());
-      atext->InterpolateOn();
+      pw->atext->SetInputConnection(importer->GetOutputPort());
+      pw->atext->InterpolateOn();
       importer->Update();
+      */
+      pw->vtkmutex->Unlock();
       break;
     
     }
