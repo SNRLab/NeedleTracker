@@ -33,17 +33,15 @@
 #include <QSemaphore.h>
 #include <QWaitCondition.h>
 
+#include "vtkMultiThreader.h"
+#include "vtkMutexLock.h"
+
 
 #include <stdio.h>
 #include <cv.h>
 #include <cxcore.h>
 #include <highgui.h>
 
-/*
-#include "opencv2/video/tracking.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
-*/
 #include <vtkMRMLScene.h>
 #include <vtkMRMLModelNode.h>
 #include <vtkMRMLModelDisplayNode.h>
@@ -128,6 +126,17 @@ public:
   
   // Use OpenCVThread class
   OpenCVThread OpenCVthread;
+  
+  // 10/1/2012 ayamada; Multi threads
+  int ThreadID;
+  vtkMultiThreader* Thread;
+  vtkMutexLock* vtkmutex;
+  void makeCVThread();
+  static void *thread_CVThread(void*);
+  int threadFlag;
+//  int makeCameraThread(const char* );
+//  vtkCamera* fileCamera;
+  
     
 public slots:
 

@@ -79,6 +79,12 @@ qSlicerNeedleTrackerModuleWidget::qSlicerNeedleTrackerModuleWidget(QWidget* _par
 //-----------------------------------------------------------------------------
 qSlicerNeedleTrackerModuleWidget::~qSlicerNeedleTrackerModuleWidget()
 {
+  
+  this->Thread->Delete();
+  this->vtkmutex->Delete();
+  this->Thread = NULL;
+  this->vtkmutex = NULL;
+  
 }
 
 //-----------------------------------------------------------------------------
@@ -98,6 +104,12 @@ void qSlicerNeedleTrackerModuleWidget::setup()
   this->FocalPlaneMapper = vtkPolyDataMapper::New();
   this->viewerPlane = vtkPlaneSource::New();
   this->testvariable = 0;
+  
+  // 10/2/2012 ayamada: for thread
+  this->ThreadID = -1;
+  this->Thread = vtkMultiThreader::New();
+  this->vtkmutex = vtkMutexLock::New();  
+  this->threadFlag = 0;
   
   // 8/20/2012 ayamada
   connect(d->OpenCVswitch, SIGNAL(clicked()),
@@ -250,7 +262,93 @@ void qSlicerNeedleTrackerModuleWidget::startOrStopOpenCVThread()
   
   this->displayOpenCVPlanes();
   
+  cvWaitKey(500);
+  
+  // VTKthread 
+  makeCVThread();
+  
+  
 }
+
+void qSlicerNeedleTrackerModuleWidget::makeCVThread()
+{
+  
+  std::cerr << "\n\nmake cvThread: OK\n\n" << std::endl;
+  
+  this->ThreadID = this->Thread->SpawnThread((vtkThreadFunctionType) &qSlicerNeedleTrackerModuleWidget::thread_CVThread, this);
+  
+}
+
+// thread function
+void *qSlicerNeedleTrackerModuleWidget::thread_CVThread(void* t)
+{
+  
+  vtkMultiThreader::ThreadInfo* vinfo = static_cast<vtkMultiThreader::ThreadInfo*>(t);
+  qSlicerNeedleTrackerModuleWidget* pw = static_cast<qSlicerNeedleTrackerModuleWidget*>(vinfo->UserData);
+  
+  // example for mutex lock/unlock
+  pw->vtkmutex->Lock();
+  pw->threadFlag = 1;
+  pw->vtkmutex->Unlock();
+  
+  CvCapture *src;
+  IplImage *frame;
+  
+  // 9/30/2012 ayamada
+  unsigned char* idata;
+  CvSize imageSize;
+  IplImage* captureImage;
+  IplImage* RGBImage;
+  IplImage* captureImageTmp;
+  vtkTexture *atext = vtkTexture::New();
+  vtkImageImport *importer = vtkImageImport::New();
+  
+  // Capture test loop 
+  if((src = cvCreateCameraCapture(0)) != NULL)
+  { 
+    cout << "Capturing is starting...\n";
+    cvWaitKey(500);
+    frame = cvQueryFrame(src);
+    
+    while(1)
+    {
+      
+      // 9/30/2012 ayamada: describ the reading part of images       
+      frame = cvQueryFrame(src);            
+      imageSize = cvSize
+      (
+       (int)cvGetCaptureProperty(src,CV_CAP_PROP_FRAME_WIDTH ),
+       (int)cvGetCaptureProperty(src,CV_CAP_PROP_FRAME_HEIGHT )
+       );
+      
+      captureImage = cvCreateImage(imageSize, IPL_DEPTH_8U,3);
+      captureImageTmp = cvCreateImage(imageSize, IPL_DEPTH_8U,3);
+      RGBImage = cvCreateImage(imageSize, IPL_DEPTH_8U, 3);
+      imageSize = cvGetSize( captureImageTmp );
+      cvFlip(captureImageTmp, captureImage, 0);
+      cvCvtColor(captureImage, RGBImage, CV_BGR2RGB);
+      
+      idata = (unsigned char*) RGBImage->imageData;
+      importer->SetWholeExtent(0,imageSize.width-1,0,imageSize.height-1,0,0);
+      importer->SetDataExtentToWholeExtent();
+      importer->SetDataScalarTypeToUnsignedChar();
+      importer->SetNumberOfScalarComponents(3);
+      importer->SetImportVoidPointer(idata);
+      atext->SetInputConnection(importer->GetOutputPort());
+      atext->InterpolateOn();
+      importer->Update();
+      break;
+    
+    }
+
+  }
+  
+  pw->threadFlag = 2;
+  return NULL;
+
+  
+}
+
 
 OpenCVThread::OpenCVThread()
 {
@@ -262,7 +360,7 @@ OpenCVThread::OpenCVThread()
 // 8/21/2012 ayamada: thread for capturing
 void OpenCVThread::run()
 {
-    
+  /*  
   // 9/30/2012 ayamada
   unsigned char* idata = NULL;
   this->importer = vtkImageImport::New();
@@ -324,6 +422,7 @@ void OpenCVThread::run()
     cout << "Capturing is not starting...\n";
   }
   this->stopped = false;
+   */
 }
 
 void OpenCVThread::stop()
