@@ -273,10 +273,10 @@ void qSlicerNeedleTrackerModuleWidget::startOrStopOpenCVThread()
   
   this->displayOpenCVPlanes();
   
-  cvWaitKey(500);
+  //cvWaitKey(500);
   
   // VTKthread 
-  makeCVThread();
+  //makeCVThread();
   
   
 }
@@ -287,6 +287,8 @@ void qSlicerNeedleTrackerModuleWidget::makeCVThread()
   std::cerr << "\n\nmake cvThread: OK\n\n" << std::endl;
   
   this->ThreadID = this->Thread->SpawnThread((vtkThreadFunctionType) &qSlicerNeedleTrackerModuleWidget::thread_CVThread, this);
+
+  //usleep(1000);
   
 }
 
@@ -318,33 +320,40 @@ void *qSlicerNeedleTrackerModuleWidget::thread_CVThread(void* t)
   if((src = cvCreateCameraCapture(0)) != NULL)
   { 
     cout << "Capturing is starting...\n";
-    cvWaitKey(500);
+    cvWaitKey(100);
     frame = cvQueryFrame(src);
     
     while(1)
     {
       
-      // 9/30/2012 ayamada: describ the reading part of images       
-      frame = cvQueryFrame(src);            
       
+      //pw->vtkmutex->Lock();
+      // 9/30/2012 ayamada: describ the reading part of images       
+      //frame = cvQueryFrame(src);            
+      
+      /*
       imageSize = cvSize
       (
        (int)cvGetCaptureProperty(src,CV_CAP_PROP_FRAME_WIDTH ),
        (int)cvGetCaptureProperty(src,CV_CAP_PROP_FRAME_HEIGHT )
       );
+       
+    
       
       captureImage = cvCreateImage(imageSize, IPL_DEPTH_8U,3);
       captureImageTmp = cvCreateImage(imageSize, IPL_DEPTH_8U,3);
       rgbImage = cvCreateImage(imageSize, IPL_DEPTH_8U, 3);
+      */
       
-      pw->vtkmutex->Lock();
       
-      
-      //imageSize = cvGetSize( captureImageTmp );
       //cvFlip(captureImageTmp, captureImage, 0);
-      //cvCvtColor(captureImage, RGBImage, CV_BGR2RGB);
+      //cvFlip(frame, captureImage, 0);
+      //cvCvtColor(captureImage, rgbImage, CV_BGR2RGB);
+      //idata = (unsigned char*) rgbImage->imageData;
+
+      //pw->vtkmutex->Lock();
+      
       /*
-      idata = (unsigned char*) RGBImage->imageData;
       importer->SetWholeExtent(0,imageSize.width-1,0,imageSize.height-1,0,0);
       importer->SetDataExtentToWholeExtent();
       importer->SetDataScalarTypeToUnsignedChar();
@@ -354,8 +363,8 @@ void *qSlicerNeedleTrackerModuleWidget::thread_CVThread(void* t)
       pw->atext->InterpolateOn();
       importer->Update();
       */
-      pw->vtkmutex->Unlock();
-      break;
+      //pw->vtkmutex->Unlock();
+      //break;
     
     }
 
